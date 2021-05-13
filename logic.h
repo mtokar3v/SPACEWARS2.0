@@ -20,12 +20,10 @@ const int h = displayMode.h;
 
 extern enum Trajectory;
 
-//std::vector<Object> objectList;
-//std::vector<Object*> moveObjectList;
-//два отдельных вектора вместо одного нужны для того, чтобы быстрее считывать попадания
 std::vector<Object*> ShotList;
 std::vector<Object*> EnemyList;
 int Player::point = 0;
+int Player::health = 100;
 int spawnTime = 3;
 
 bool init()
@@ -99,7 +97,6 @@ void play()
 	Object backgroung(ren, background_texture);
 	backgroung.resizeOn(displayMode.w, displayMode.h); //640x360
 	backgroung.render();
-	//objectList.push_back(backgroung);
 
 	//Корабль игрока
 	SDL_Texture* player_texture = IMG_LoadTexture(ren, "image//player1.png");
@@ -134,7 +131,11 @@ void play()
 	Timer t;
 	while (run)
 	{
-		
+		if (Player::getHealth() < 0)
+		{
+			run = false;
+			break;
+		}
 		//чтобы замедлить обработку и движение корабля
 		SDL_Delay(30);
 
@@ -190,7 +191,12 @@ void play()
 				Enemy* someEnemy = new Enemy(ren, enemy1_texture, 100, 3, tr);
 				switch (tr)
 				{
-				case WALL:someEnemy->moveTo(x+=50, y -= 30);
+				case WALL:someEnemy->moveTo(x += 30, y -= 30); break;
+				case ARROW:
+					if (i % 2)
+						someEnemy->moveTo(x += 30 * i, y -= 30);
+					else
+						someEnemy->moveTo(x -= 30 * i, y); break;
 				default: someEnemy->moveTo(x, y -= 30);
 				}
 				someEnemy->resizeOn(24, 24);
@@ -208,6 +214,9 @@ void play()
 
 		add_text(ren, font, color, "Point: ", 0, 25);
 		add_text(ren, font, color, std::to_string(Player::getPoints()), 45, 25);
+
+		add_text(ren, font, color, "Health: ", 0, 50);
+		add_text(ren, font, color, std::to_string(Player::getHealth()), 45,50);
 
 		player.render();
 		move_dimanic_object();

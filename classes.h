@@ -18,7 +18,16 @@ enum Trajectory
 	WALL,		//стенкой
 	SINUSOID,	//синусоида
 	COSINUSOID,	//косинусоида
+	ARROW,
 	TRAJCOUNT	//количество траекторий
+};
+
+enum ShotTr
+{
+	DOUBLE,			//выстрелы с двух сторон
+	TRIPLE,			//выстрелы  в три стороны
+	LINE,			//луч
+	SHOTCOUNT		//количество режимов стрельбы
 };
 
 class Object 
@@ -109,6 +118,7 @@ class Player : public Object
 {
 private:
 	double speed;
+	static int health;
 	static int point;
 public:
 	Player(SDL_Renderer* ren, SDL_Texture* texture) : Object(ren, texture)
@@ -126,10 +136,22 @@ public:
 		return point;
 	}
 
+	static void makeDamage()
+	{
+		health -= 10;
+	}
+
+	static int getHealth()
+	{
+		return health;
+	}
+
 	static void addPoint(int somePoint)
 	{
 		point += somePoint;
 	}
+
+
 };
 
 class Enemy : public Object
@@ -150,8 +172,10 @@ public:
 	bool check_confines(int x, int y)
 	{
 		int offset = 70;
-		if (rect->y + y - offset < displayMode.h)
+		if (rect->x + x + offset < displayMode.w && rect->x + x - offset > 0 && rect->y + y - offset < displayMode.h)
 				return true;
+		else if (rect->y + y > displayMode.h)
+			Player::makeDamage();
 		return false;
 	}
 
@@ -161,14 +185,9 @@ public:
 		{
 		case SINUSOID: move(sin(rect->y / 10) * 8, speed); break;
 		case COSINUSOID: move(cos(rect->y / 10) * 8, speed); break;
-		case LINE: move(0, speed); break;
-		case WALL: move(0, speed); break;
-			
-			
-
+		default: move(0, speed); break;
 		}
 		
-		//SDL_Delay(3);
 		if (check_confines(0, speed))
 		{
 			if (isCrash(rect->x, rect->y, rect->w, rect->h))
@@ -190,7 +209,7 @@ bool isCrash (int x, int y, int w, int h)
 	for (at = ShotList.begin(); at != ShotList.end(); at++)
 		if ((**at).get_x() <= x + w / 2 && (**at).get_x() >= x - w / 2 && (**at).get_y() <= y + h / 2)
 		{
-			(**at).moveTo(0, 0);
+			(**at).moveTo(-10, 0);
 			return true;
 		}
 	return false;
@@ -210,7 +229,7 @@ public:
 	virtual bool check_confines(int x, int y)
 	{
 		int offset = 70;
-		if (rect->y + y + offset > 0 && rect->x + x + offset < displayMode.w && rect->x + x + offset > 0)
+		if (rect->y + y + offset > 0)
 			return true;
 		return false;
 	}

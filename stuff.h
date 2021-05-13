@@ -5,7 +5,6 @@
 class Timer
 {
 private:
-	// Псевдонимы типов используются для удобного доступа к вложенным типам
 	using clock_t = std::chrono::high_resolution_clock;
 	using second_t = std::chrono::duration<double, std::ratio<1> >;
 
@@ -31,7 +30,7 @@ void add_text(SDL_Renderer* ren, TTF_Font* font, SDL_Color color, std::string ms
 {
 	SDL_Surface* text = TTF_RenderText_Solid(font, msg.c_str(), color);
 
-	if (!text)
+	if (!text) 
 	{
 		std::cout << "Failed to render text: " << TTF_GetError();
 	}
