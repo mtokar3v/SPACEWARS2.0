@@ -19,11 +19,13 @@ const int w = displayMode.w;
 const int h = displayMode.h;
 
 extern enum Trajectory;
+extern enum ShotTr;
 
 std::vector<Object*> ShotList;
 std::vector<Object*> EnemyList;
 int Player::point = 0;
-int Player::health = 100;
+int Player::health = 10000;
+ShotTr Player::tr = NONE;
 int spawnTime = 3;
 
 bool init()
@@ -91,7 +93,7 @@ void play()
 	if(!init())
 		return;
 	SDL_RenderClear(ren);
-	
+
 	//Космос
 	SDL_Texture* background_texture = IMG_LoadTexture(ren, "image//space.png");
 	Object backgroung(ren, background_texture);
@@ -112,6 +114,9 @@ void play()
 	SDL_Texture* shot_texture = IMG_LoadTexture(ren, "image//fire.png");//18x10
 	SDL_RenderPresent(ren);
 
+	//Бонус
+	SDL_Texture* bonus_texture = IMG_LoadTexture(ren, "image//bonus.png");//400x400
+
 	//шрифт
 	TTF_Font* font = TTF_OpenFont("fonts//Thintel.ttf", 25);
 	SDL_Color color = { 0xff, 0xff, 0xff };
@@ -124,6 +129,7 @@ void play()
 
 	bool run = true;
 	bool enemySpawn = true;
+	bool bonusSpawn = true;
 	SDL_Event event;
 	const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
 	std::string time;
@@ -150,15 +156,74 @@ void play()
 			if (event.button.button == SDL_BUTTON_LEFT && event.button.x <= 10 && event.button.y <= 10)
 				run = false; break;
 		case SDL_KEYDOWN:
-
+			if (event.key.keysym.sym == SDLK_0)
+				Player::setModificator(NONE);
 			//############# ВЫСТРЕЛЫ #################
 			if (event.key.keysym.sym == SDLK_SPACE)
 			{
-				Shot* someShot = new Shot(ren, shot_texture);
-				someShot->moveTo(player.get_x(), player.get_y());
-				someShot->resizeOn(10, 18);
-				ShotList.push_back(someShot);
-			}break;
+				ShotTr tr =  Player::getModificator();
+				
+				std::cout << tr;
+				switch (tr)
+				{
+				case RAY: 
+				{
+					Shot* someShot = new Shot(ren, shot_texture, 2);
+					someShot->upgrade(RAY);
+					someShot->move(player.get_x(), player.get_y() - 300);
+					someShot->resizeOn(10, displayMode.h / 2);
+					ShotList.push_back(someShot);
+					break;
+				}
+				case TRIPLE:
+				{
+					Shot* someShot = new Shot(ren, shot_texture, 1);
+					someShot->upgrade(TRIPLE);
+					someShot->move(player.get_x(), player.get_y());
+					someShot->resizeOn(10, 18);
+					ShotList.push_back(someShot);
+					
+					Shot* someShot2 = new Shot(ren, shot_texture, 2);
+					someShot2->upgrade(TRIPLE);
+					someShot2->move(player.get_x(), player.get_y());
+					someShot2->resizeOn(10, 18);
+					ShotList.push_back(someShot2);
+
+					Shot* someShot3 = new Shot(ren, shot_texture, 3);
+					someShot3->upgrade(TRIPLE);
+					someShot3->move(player.get_x(), player.get_y());
+					someShot3->resizeOn(10, 18);
+					ShotList.push_back(someShot3);
+					break;
+				}
+				case DOUBLE:
+				{
+					Shot* someShot = new Shot(ren, shot_texture, 1);
+					someShot->move(player.get_x(), player.get_y());
+					someShot->resizeOn(10, 18);
+					someShot->upgrade(DOUBLE);
+					ShotList.push_back(someShot);
+
+					Shot* someShot2 = new Shot(ren, shot_texture, 3);
+					someShot2->move(player.get_x(), player.get_y());
+					someShot2->resizeOn(10, 18);
+					someShot2->upgrade(DOUBLE);
+					ShotList.push_back(someShot2);
+					break;
+				}
+				default:
+				{
+					Shot* someShot = new Shot(ren, shot_texture, 2 );
+					someShot->upgrade(tr);
+					someShot->move(player.get_x(), player.get_y());
+					someShot->resizeOn(10, 18);
+					ShotList.push_back(someShot);
+				}
+				}
+			}
+
+			
+			break;
 
 		}
 
@@ -178,6 +243,7 @@ void play()
 
 
 
+		//спавн врагов
 		if (!((int)t.elapsed() % spawnTime) && enemySpawn)
 		{
 			enemySpawn = false;
@@ -206,6 +272,24 @@ void play()
 		else if ((int)t.elapsed() % spawnTime)
 			enemySpawn = true;
 
+		//спавн модификаторов 
+		if (!((int)t.elapsed() % (spawnTime * 1)) && bonusSpawn)
+		{
+			bonusSpawn = false;
+
+			ShotTr tr = static_cast<ShotTr>(rand() % SHOTCOUNT);
+			int x = rand() % displayMode.w;
+			int y = 0;
+		
+			Bonus* bonus = new Bonus(ren, bonus_texture, tr);
+			bonus->moveTo(x, y);
+			bonus->resizeOn(40, 40);
+			EnemyList.push_back(bonus);
+			
+		}
+		else if ((int)t.elapsed() % (spawnTime * 1))
+			bonusSpawn = true;
+
 		SDL_RenderClear(ren);
 		backgroung.render();
 
@@ -218,9 +302,13 @@ void play()
 		add_text(ren, font, color, "Health: ", 0, 50);
 		add_text(ren, font, color, std::to_string(Player::getHealth()), 45,50);
 
+		
 		player.render();
+		
 		move_dimanic_object();
+		
 		SDL_RenderPresent(ren);
+		
 	}
 	SDL_Quit();
 	

@@ -6,8 +6,11 @@
 #include <SDL_image.h>
 #include <SDL_mixer.h>
 #include <SDL_ttf.h>
+#include "stuff.h"
+
 
 class Object;
+class Shot;
 class Enemy;
 extern SDL_DisplayMode displayMode;
 extern std::vector<Object*> ShotList;
@@ -24,9 +27,10 @@ enum Trajectory
 
 enum ShotTr
 {
+	NONE,
 	DOUBLE,			//выстрелы с двух сторон
 	TRIPLE,			//выстрелы  в три стороны
-	LINE,			//луч
+	RAY,			//луч
 	SHOTCOUNT		//количество режимов стрельбы
 };
 
@@ -112,7 +116,7 @@ public:
 
 };
 
-bool isCrash(int x, int y, int w, int h/* std::vector<Object*> tmp*/);
+bool isCrash(int x, int y, int w, int h);
 
 class Player : public Object
 {
@@ -120,6 +124,8 @@ private:
 	double speed;
 	static int health;
 	static int point;
+	static ShotTr tr;
+	//static Timer* timer;
 public:
 	Player(SDL_Renderer* ren, SDL_Texture* texture) : Object(ren, texture)
 	{
@@ -128,7 +134,6 @@ public:
 	int playerSpeed()
 	{
 		return speed;
-
 	}
 
 	static int getPoints()
@@ -146,12 +151,34 @@ public:
 		return health;
 	}
 
+	static void setModificator(ShotTr t)
+	{
+		//if (t != NONE)
+		//{
+			//if(timer)
+				//delete timer;
+		//	timer = new Timer();
+		//}
+		tr = t;
+	}
+
+	/*static double getModificatorTime()
+	{
+		if (timer)
+			return timer->elapsed();
+		else
+			return 0;
+	}*/
+
+	static ShotTr getModificator()
+	{
+		return tr;
+	}
+
 	static void addPoint(int somePoint)
 	{
 		point += somePoint;
 	}
-
-
 };
 
 class Enemy : public Object
@@ -203,43 +230,63 @@ public:
 	}
 };
 
-bool isCrash (int x, int y, int w, int h)
-{
-	std::vector<Object*>::iterator at;
-	for (at = ShotList.begin(); at != ShotList.end(); at++)
-		if ((**at).get_x() <= x + w / 2 && (**at).get_x() >= x - w / 2 && (**at).get_y() <= y + h / 2)
-		{
-			(**at).moveTo(-10, 0);
-			return true;
-		}
-	return false;
-}
-
 
 //у выстрелов тоже может быть разная траектория, разная скорость и тд, поэтому отдельный класс
 class Shot : public Object
 {
+	ShotTr modificator;
+	int num;
+	bool invulnerability;
 	int speed;
 public:
-	Shot(SDL_Renderer* ren, SDL_Texture* texture) : Object(ren, texture)
+	Shot(SDL_Renderer* ren, SDL_Texture* texture, int num) : Object(ren, texture)
 	{
+		modificator = NONE;
+		invulnerability = false;
+		this->num = num;
+		switch (num)
+		{
+		case 2: rect->x += 55; break;
+		case 3: rect->x += 110; break;
+		}
 		speed = 7;
+	}
+
+	void upgrade(ShotTr tr)
+	{
+		modificator = tr;
+	}
+
+	bool getInv()
+	{
+		return invulnerability;
 	}
 
 	virtual bool check_confines(int x, int y)
 	{
-		int offset = 70;
+		int offset = 250;
 		if (rect->y + y + offset > 0)
 			return true;
 		return false;
 	}
 
-	//относительно траектории
 	bool go()
 	{
-		//во втором аргументе - функция
-		move(0, - speed);
-		//std::cout << rect->x << " " << rect->y << std::endl;
+		if (modificator == RAY)
+			invulnerability = true;
+		
+		if (modificator == TRIPLE)
+		{
+			switch (num)
+			{
+			case 1: move(-5, -speed); break;
+			case 2: move( 0, -speed); break;
+			case 3: move(5, -speed); break;
+			}
+		}
+		else
+			move(0, -speed);
+		
 		if (check_confines(0, -speed) )
 		{
 			render();
@@ -249,3 +296,47 @@ public:
 			return false;
 	}
 };
+
+class Bonus : public Object
+{
+private:
+	ShotTr tr;
+	int speed;
+public:
+	Bonus(SDL_Renderer* ren, SDL_Texture* texture, ShotTr tr) : Object(ren, texture)
+	{
+		this->tr = tr;
+		speed = 2;
+	}
+	bool go()
+	{
+		move(0, speed);
+
+		if (check_confines(0, speed))
+		{
+			if (isCrash(rect->x, rect->y, rect->w, rect->h))
+			{
+				moveTo(-40, 0);
+				Player::setModificator(tr);
+			}
+			else
+			{
+				render();
+				return true;
+			}
+		}
+	}
+};
+
+bool isCrash(int x, int y, int w, int h)
+{
+	std::vector<Object*>::iterator at;
+	for (at = ShotList.begin(); at != ShotList.end(); at++)
+		if ((**at).get_x() <= x + w && (**at).get_x() >= x - w / 2 && (**at).get_y() <= y + h / 2)
+		{
+			if (!(dynamic_cast<Shot*>(*at))->getInv())
+				(**at).moveTo(-10, 0);
+			return true;
+		}
+	return false;
+}
