@@ -149,8 +149,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="classes.h" />
+    <ClInclude Include="arcade.h" />
+    <ClInclude Include="data.h" />
+    <ClInclude Include="company.h" />
+    <ClInclude Include="textures.h" />
     <ClInclude Include="logic.h" />
-    <ClInclude Include="stuff.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,19 +1,5 @@
 #pragma once
-#include <iostream>
-#include <string>
-#include <vector>
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_mixer.h>
-#include <SDL_ttf.h>
-#include "stuff.h"
-
-
-class Object;
-class Shot;
-class Enemy;
-extern SDL_DisplayMode displayMode;
-extern std::vector<Object*> ShotList;
+#include "data.h"
 
 enum Trajectory
 {
@@ -32,6 +18,30 @@ enum ShotTr
 	TRIPLE,			//выстрелы  в три стороны
 	RAY,			//луч
 	SHOTCOUNT		//количество режимов стрельбы
+};
+
+class Timer
+{
+private:
+	using clock_t = std::chrono::high_resolution_clock;
+	using second_t = std::chrono::duration<double, std::ratio<1> >;
+
+	std::chrono::time_point<clock_t> m_beg;
+
+public:
+	Timer() : m_beg(clock_t::now())
+	{
+	}
+
+	void reset()
+	{
+		m_beg = clock_t::now();
+	}
+
+	double elapsed() const
+	{
+		return std::chrono::duration_cast<second_t>(clock_t::now() - m_beg).count();
+	}
 };
 
 class Object 
@@ -108,24 +118,22 @@ public:
 
 	virtual bool go() { return true; }
 
-	~Object()
+	virtual ~Object()
 	{
-		SDL_DestroyTexture(texture);
-		delete rect;
+		//SDL_DestroyTexture(texture);
+		//delete rect;
 	}
 
 };
-
-bool isCrash(int x, int y, int w, int h);
 
 class Player : public Object
 {
 private:
 	double speed;
+	static Timer* timer;
 	static int health;
 	static int point;
 	static ShotTr tr;
-	//static Timer* timer;
 public:
 	Player(SDL_Renderer* ren, SDL_Texture* texture) : Object(ren, texture)
 	{
@@ -151,24 +159,22 @@ public:
 		return health;
 	}
 
+	static void fullHealth()
+	{
+		health = 100;
+	}
+
 	static void setModificator(ShotTr t)
 	{
-		//if (t != NONE)
-		//{
-			//if(timer)
-				//delete timer;
-		//	timer = new Timer();
-		//}
+		timer->reset();
 		tr = t;
 	}
 
-	/*static double getModificatorTime()
+	static double getModificatorTime()
 	{
-		if (timer)
-			return timer->elapsed();
-		else
-			return 0;
-	}*/
+		return timer->elapsed();
+		
+	}
 
 	static ShotTr getModificator()
 	{
@@ -186,7 +192,6 @@ class Enemy : public Object
 private:
 	int speed;
 	int points;
-	double o = 0;
 	Trajectory traj;
 public:
 	Enemy(SDL_Renderer* ren, SDL_Texture* texture, int points, int speed, Trajectory tr) : Object(ren, texture)
@@ -194,6 +199,10 @@ public:
 		this->points = points;
 		this->speed = speed;
 		traj = tr;
+	}
+
+	~Enemy()
+	{
 	}
 
 	bool check_confines(int x, int y)
@@ -225,13 +234,10 @@ public:
 				return true;
 			}
 		}
-
 		return false;
 	}
 };
 
-
-//у выстрелов тоже может быть разная траектория, разная скорость и тд, поэтому отдельный класс
 class Shot : public Object
 {
 	ShotTr modificator;
@@ -251,7 +257,9 @@ public:
 		}
 		speed = 7;
 	}
-
+	~Shot()
+	{
+	}
 	void upgrade(ShotTr tr)
 	{
 		modificator = tr;
@@ -297,18 +305,19 @@ public:
 	}
 };
 
-class Bonus : public Object
+class Heal : public Object
 {
-private:
-	ShotTr tr;
+protected:
 	int speed;
 public:
-	Bonus(SDL_Renderer* ren, SDL_Texture* texture, ShotTr tr) : Object(ren, texture)
+	Heal(SDL_Renderer* ren, SDL_Texture* texture) : Object(ren, texture)
 	{
-		this->tr = tr;
 		speed = 2;
 	}
-	bool go()
+	virtual ~Heal()
+	{
+	}
+	virtual bool go()
 	{
 		move(0, speed);
 
@@ -316,8 +325,8 @@ public:
 		{
 			if (isCrash(rect->x, rect->y, rect->w, rect->h))
 			{
-				moveTo(-40, 0);
-				Player::setModificator(tr);
+				Player::fullHealth();
+				return false;
 			}
 			else
 			{
@@ -328,15 +337,35 @@ public:
 	}
 };
 
-bool isCrash(int x, int y, int w, int h)
+class Bonus : public Heal
 {
-	std::vector<Object*>::iterator at;
-	for (at = ShotList.begin(); at != ShotList.end(); at++)
-		if ((**at).get_x() <= x + w && (**at).get_x() >= x - w / 2 && (**at).get_y() <= y + h / 2)
+private:
+	ShotTr tr;
+public:
+	Bonus(SDL_Renderer* ren, SDL_Texture* texture, ShotTr tr) : Heal(ren, texture)
+	{
+		this->tr = tr;
+	}	
+	~Bonus()
+	{
+	}
+	bool go()
+	{
+		move(0, speed);
+
+		if (check_confines(0, speed))
 		{
-			if (!(dynamic_cast<Shot*>(*at))->getInv())
-				(**at).moveTo(-10, 0);
-			return true;
+			if (isCrash(rect->x, rect->y, rect->w, rect->h))
+			{
+				Player::setModificator(tr);
+				return false;
+			}
+			else
+			{
+				render();
+				return true;
+			}
 		}
-	return false;
-}
+	}
+};
+
