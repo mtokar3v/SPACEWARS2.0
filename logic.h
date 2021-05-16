@@ -43,6 +43,25 @@ bool init()
 	return true;
 }
 
+void close()
+{
+	SDL_DestroyTexture(background_texture);
+	SDL_DestroyTexture(mainMenu_texture);
+	SDL_DestroyTexture(player_texture);
+	SDL_DestroyTexture(shot_texture);
+	SDL_DestroyTexture(bonus_texture);
+	SDL_DestroyTexture(heal_texture);
+	SDL_DestroyTexture(spaceShop_texture);
+	SDL_DestroyTexture(sparkle_texture);
+	SDL_DestroyTexture(master_texture);
+	SDL_DestroyTexture(master_damage_texture);
+	SDL_DestroyTexture(rainbow_texture);
+	TTF_CloseFont(font);
+	TTF_CloseFont(bigFont);
+	SDL_DestroyRenderer(ren);
+	SDL_DestroyWindow(win);
+}
+
 void move_dimanic_object()
 {
 	std::vector<Object*> copy;
@@ -346,7 +365,5 @@ void shopping()
 			add_text(ren, font, color, std::to_string(Player::getPoints()), 80, 60);
 			SDL_RenderPresent(ren);
 		}
-
-		
 	}
 }

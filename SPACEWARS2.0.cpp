@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
 			}
 		}
 	}
-	return 0;
 
-	//в конце нужно закрыть потоки и все остальное
+	close();
+	return 0;
 }
