@@ -15,7 +15,6 @@ void playArcade()
 	Timer t;
 	while (run)
 	{
-		if (Player::getHealth() < 0) { run = false; break; }
 
 		//чтобы замедлить обработку и движение корабля
 		SDL_Delay(30);
@@ -63,5 +62,27 @@ void playArcade()
 
 		move_dimanic_object();
 		SDL_RenderPresent(ren);
+
+		if (Player::getHealth() < 0)
+		{
+			SDL_RenderClear(ren);
+			backgroung.render();
+			add_text(ren, bigFont, color, "YOU LOSE", displayMode.w * 0.45, displayMode.h * 0.45);
+			add_text(ren, font, color, "total point: ", displayMode.w * 0.45, displayMode.h * 0.55);
+			add_text(ren, font, color, std::to_string(Player::getPoints()), displayMode.w * 0.53, displayMode.h * 0.55);
+			SDL_RenderPresent(ren);
+			while (run)
+			{
+				SDL_PollEvent(&event);
+				if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
+					run = false;
+			}
+			SDL_RenderClear(ren);
+		}
 	}
+	Player::spendPoints(Player::getPoints());
+	Player::fullHealth();
+	clearBattleArea();
+	wave = 1;
+	run = true;
 }

@@ -99,7 +99,7 @@ private:
 public:
 	Master(SDL_Renderer* ren, SDL_Texture* texture, Player* player) : Object(ren, texture)
 	{
-		hp = 100;
+		hp = 10000;
 		speed = 2;
 		spawnTime = 10;
 		right = true;

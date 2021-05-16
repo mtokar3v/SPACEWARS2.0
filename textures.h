@@ -26,6 +26,7 @@ void setTextures()
 
 	//шрифт
 	font = TTF_OpenFont("fonts//Thintel.ttf", 25);
+	bigFont = TTF_OpenFont("fonts//Thintel.ttf", 60);
 	color = { 0xff, 0xff, 0xff };
 	if (!font)
 	{
@@ -39,8 +40,13 @@ void setTextures()
 	//магазин
 	spaceShop_texture = IMG_LoadTexture(ren, "image//spaceshop.png");
 		
+	//босс
 	master_texture = IMG_LoadTexture(ren, "image//boss.png");
 	master_damage_texture = IMG_LoadTexture(ren, "image//bossDamage.png");
 
+	//радуга босса
 	rainbow_texture = IMG_LoadTexture(ren, "image//rainbow.png");
+
+	//главное меню
+	mainMenu_texture = IMG_LoadTexture(ren, "image//mainmenu.png");
 }

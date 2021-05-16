@@ -121,8 +121,6 @@ public:
 
 	virtual ~Object()
 	{
-		//SDL_DestroyTexture(texture);
-		//delete rect;
 	}
 
 };
@@ -218,8 +216,8 @@ private:
 
 	bool check_confines(int x, int y)
 	{
-		int offset = 70;
-		if (rect->x + x + offset < displayMode.w && rect->x + x - offset > 0 && rect->y + y - offset < displayMode.h)
+		int offset = 30;
+		if (rect->x + x + offset * 2 < displayMode.w && rect->x + x - offset > 0 && rect->y + y - offset < displayMode.h)
 			return true;
 		else if (rect->y + y > displayMode.h)
 			Player::makeDamage();

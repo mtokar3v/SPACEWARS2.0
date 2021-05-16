@@ -38,6 +38,7 @@ std::vector<Object*> ShotList;
 std::vector<Object*> EnemyList;
 std::vector<SDL_Texture*> enemy_textures;
 SDL_Texture* background_texture;
+SDL_Texture* mainMenu_texture;
 SDL_Texture* player_texture;
 SDL_Texture* shot_texture;
 SDL_Texture* bonus_texture;
@@ -48,6 +49,7 @@ SDL_Texture* master_texture;
 SDL_Texture* master_damage_texture;
 SDL_Texture* rainbow_texture;
 TTF_Font* font;
+TTF_Font* bigFont;
 SDL_Color color;
 
 //######### FUNCTIONS ########
