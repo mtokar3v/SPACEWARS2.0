@@ -20,17 +20,11 @@ void playArcade()
 		SDL_Delay(30);
 		//считывались все эвенты, даже одновременные, поэтому можно бегать о диагонали 
 		SDL_PollEvent(&event); 
-		
-		switch (event.type)
-		{
-		case SDL_QUIT: run = false; break;
-		case SDL_MOUSEBUTTONDOWN:
-			if (event.button.button == SDL_BUTTON_LEFT && event.button.x <= 10 && event.button.y <= 10)
-				run = false; break;
-		case SDL_KEYDOWN:
-			shoting(event, player);
-			break;	
-		}
+	
+		shoting(event, player);
+		if (event.key.keysym.sym == SDLK_q)
+			run = false;
+	
 		moving(player);
 
 		spawningEnemy((int)t.elapsed(), spawnTime, enemySpawn);
@@ -81,6 +75,7 @@ void playArcade()
 		}
 	}
 	Player::spendPoints(Player::getPoints());
+	Player::addTotalPoint(-Player::getTotalPoint());
 	Player::fullHealth();
 	clearBattleArea();
 	wave = 1;

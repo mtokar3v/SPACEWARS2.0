@@ -26,16 +26,9 @@ void playCompany()
 		//считывались все эвенты, даже одновременные, поэтому можно бегать о диагонали 
 		SDL_PollEvent(&event);
 
-		switch (event.type)
-		{
-		case SDL_QUIT: run = false; break;
-		case SDL_MOUSEBUTTONDOWN:
-			if (event.button.button == SDL_BUTTON_LEFT && event.button.x <= 10 && event.button.y <= 10)
-				run = false; break;
-		case SDL_KEYDOWN:
-			shoting(event, player);
-			break;
-		}
+		shoting(event, player);
+		if (event.key.keysym.sym == SDLK_q)
+			run = false;
 		moving(player);
 
 		spawningEnemy((int)t.elapsed(), spawnTime, enemySpawn);
@@ -82,7 +75,7 @@ void playCompany()
 				backgroung.render();
 				add_text(ren, bigFont, color, "YOU WIN", displayMode.w * 0.45, displayMode.h * 0.45);
 				add_text(ren, font, color, "total point: ", displayMode.w * 0.45, displayMode.h * 0.55);
-				add_text(ren, font, color, std::to_string(Player::getPoints()), displayMode.w * 0.53, displayMode.h * 0.55);
+				add_text(ren, font, color, std::to_string(Player::getTotalPoint()), displayMode.w * 0.53, displayMode.h * 0.55);
 				SDL_RenderPresent(ren);
 				while (run)
 				{
@@ -105,7 +98,7 @@ void playCompany()
 			backgroung.render();
 			add_text(ren, bigFont, color, "YOU LOSE", displayMode.w * 0.45, displayMode.h * 0.45);
 			add_text(ren, font, color, "total point: ", displayMode.w * 0.45, displayMode.h * 0.55);
-			add_text(ren, font, color, std::to_string(Player::getPoints()), displayMode.w * 0.53, displayMode.h * 0.55);
+			add_text(ren, font, color, std::to_string(Player::getTotalPoint()), displayMode.w * 0.53, displayMode.h * 0.55);
 			SDL_RenderPresent(ren);
 			while (run)
 			{
@@ -121,6 +114,7 @@ void playCompany()
 		delete master;
 	powerMulty = 1;
 	Player::spendPoints(Player::getPoints());
+	Player::addTotalPoint(-Player::getTotalPoint());
 	Player::upMaxHealth(100);
 	Player::fullHealth();
 	Player::upSpeed(10);

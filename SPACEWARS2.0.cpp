@@ -17,6 +17,7 @@
 #include "dungeonMaster.h"
 
 int Player::point = 0;
+int Player::totalPoint = 0;
 int Player::health = 100;
 int Player::maxHealth = 100;
 int Player::speed = 10;

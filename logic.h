@@ -97,7 +97,7 @@ void move_dimanic_object()
 //############# ¬€—“–≈À€ #################
 void shoting(SDL_Event event, Player& player)
 {
-	if (event.key.keysym.sym == SDLK_SPACE)
+	if (event.key.keysym.sym == SDLK_SPACE )
 	{
 		ShotTr tr = Player::getModificator();
 		switch (tr)
@@ -155,10 +155,9 @@ void spawningEnemy(int time, int spawnTime, bool &enemySpawn)
 
 		int rnd = rand() % 10 + 10;
 		Trajectory tr = static_cast<Trajectory>(rand() % TRAJCOUNT);
-		int x = rand() % displayMode.w;
+		int x = rand() % (displayMode.w - 200) + 100;
 		int y = 0;
 
-		std::cout << rnd << ":" << tr << std::endl;
 		for (int i = 0; i < rnd; i++)
 		{
 			switch (tr)
@@ -297,7 +296,7 @@ bool isCrash(int x, int y, int w, int h)
 {
 	std::vector<Object*>::iterator at;
 	for (at = ShotList.begin(); at != ShotList.end(); at++)
-		if ((**at).get_x() <= x + w && (**at).get_x() >= x - w / 2 && (**at).get_y() <= y + h / 2)
+		if ((**at).get_x() <= x + w && (**at).get_x() >= x - w / 2 && (**at).get_y() <= y + h / 2 && (**at).get_y() >= y - h / 2)
 		{
 			if (!(dynamic_cast<Shot*>(*at))->getInv())
 				(**at).moveTo(-10, 0);
@@ -311,6 +310,9 @@ void clearBattleArea()
 	std::vector<Object*>::iterator at;
 	for (at = EnemyList.begin(); at != EnemyList.end(); at++)
 		(*at)->moveTo(-100, 0);
+
+	for (at = ShotList.begin(); at != ShotList.end(); at++)
+		(*at)->moveTo(-100, 0);
 }
 
 void shopping()
@@ -323,7 +325,6 @@ void shopping()
 	add_text(ren, font, color, "Point: ", 40, 60);
 	add_text(ren, font, color, std::to_string(Player::getPoints()), 80, 60);
 	SDL_RenderPresent(ren);
-
 
 	while (run)
 	{

@@ -62,8 +62,8 @@ public:
 
 	virtual bool check_confines(int x, int y)
 	{
-		int offset = 70;
-		if (rect->x + x + offset < displayMode.w && rect->x + x + offset > 0 && rect->y + y - offset < displayMode.h && rect->y + y + offset > 0)
+		int offset = 30;
+		if (rect->x + x + offset < displayMode.w && rect->x + x + offset > 0 && rect->y + y + offset < displayMode.h && rect->y + y + offset > 0)
 			return true;
 		return false;
 	}
@@ -133,6 +133,7 @@ private:
 	static int health;
 	static int maxHealth;
 	static int point;
+	static int totalPoint;
 	static ShotTr tr;
 public:
 	Player(SDL_Renderer* ren, SDL_Texture* texture) : Object(ren, texture)
@@ -151,6 +152,16 @@ public:
 	static int getPoints()
 	{
 		return point;
+	}
+
+	static void addTotalPoint(int s)
+	{
+		totalPoint += s;
+	}
+	
+	static int getTotalPoint()
+	{
+		return totalPoint;
 	}
 
 	static bool spendPoints(int cash)
@@ -217,7 +228,7 @@ private:
 	bool check_confines(int x, int y)
 	{
 		int offset = 30;
-		if (rect->x + x + offset * 2 < displayMode.w && rect->x + x - offset > 0 && rect->y + y - offset < displayMode.h)
+		if (rect->x + x < displayMode.w && rect->x + x > 0 && rect->y + y - offset < displayMode.h	)
 			return true;
 		else if (rect->y + y > displayMode.h)
 			Player::makeDamage();
@@ -235,7 +246,6 @@ public:
 	{
 	}
 
-
 	bool go()
 	{
 		switch (traj)
@@ -248,7 +258,10 @@ public:
 		if (check_confines(0, speed))
 		{
 			if (isCrash(rect->x, rect->y, rect->w, rect->h))
+			{
+				Player::addTotalPoint(points);
 				Player::addPoint(points);
+			}
 			else
 			{
 				render();
