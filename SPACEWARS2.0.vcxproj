@@ -152,6 +152,7 @@
     <ClInclude Include="arcade.h" />
     <ClInclude Include="data.h" />
     <ClInclude Include="company.h" />
+    <ClInclude Include="dungeonMaster.h" />
     <ClInclude Include="textures.h" />
     <ClInclude Include="logic.h" />
   </ItemGroup>

@@ -1,10 +1,6 @@
 #pragma once
 #include "logic.h"
 
-int Player::point = 0;
-int Player::health = 100;
-ShotTr Player::tr = NONE;
-
 void playArcade()
 {
 	Object backgroung(ren, background_texture);
@@ -44,7 +40,7 @@ void playArcade()
 
 		//изменение настроек уровня и спавн аптечки
 		if (!((int)t.elapsed() % 30) && levelUp && (int)t.elapsed())
-		{                                     
+		{           
 			wave++;
 			int x = rand() % displayMode.w;
 			int y = 0;

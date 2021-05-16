@@ -50,6 +50,7 @@ protected:
 	SDL_Rect* rect;
 	SDL_Texture* texture;
 	SDL_Renderer* ren;
+
 public:
 	Object(SDL_Renderer* ren, SDL_Texture* texture)
 	{
@@ -57,6 +58,14 @@ public:
 		rect = new SDL_Rect;
 		this->texture = texture;
 		*rect = { 0, 0, 0, 0 };
+	}
+
+	virtual bool check_confines(int x, int y)
+	{
+		int offset = 70;
+		if (rect->x + x + offset < displayMode.w && rect->x + x + offset > 0 && rect->y + y - offset < displayMode.h && rect->y + y + offset > 0)
+			return true;
+		return false;
 	}
 
 	void move(double x, double y)
@@ -103,14 +112,6 @@ public:
 		return rect->h;
 	}
 
-	virtual bool check_confines(int x, int y)
-	{
-		int offset = 70;
-		if (rect->x + x + offset < displayMode.w && rect->x + x + offset > 0 && rect->y + y - offset < displayMode.h && rect->y + y + offset > 0)
-			return true;
-		return false;
-	}
-
 	void render()
 	{
 		SDL_RenderCopy(ren, texture, NULL, rect);
@@ -129,24 +130,40 @@ public:
 class Player : public Object
 {
 private:
-	double speed;
+	static int speed;
 	static Timer* timer;
 	static int health;
+	static int maxHealth;
 	static int point;
 	static ShotTr tr;
 public:
 	Player(SDL_Renderer* ren, SDL_Texture* texture) : Object(ren, texture)
 	{
-		speed = 10;
 	}
-	int playerSpeed()
+	static int playerSpeed()
 	{
 		return speed;
+	}
+
+	static void upSpeed(double tmp)
+	{
+		speed = tmp;
 	}
 
 	static int getPoints()
 	{
 		return point;
+	}
+
+	static bool spendPoints(int cash)
+	{
+		if (cash <= point)
+		{
+			point -= cash;
+			return true;
+		}
+		else
+			return false;
 	}
 
 	static void makeDamage()
@@ -161,7 +178,12 @@ public:
 
 	static void fullHealth()
 	{
-		health = 100;
+		health = maxHealth;
+	}
+
+	static void upMaxHealth(int tmp)
+	{
+		maxHealth = tmp;
 	}
 
 	static void setModificator(ShotTr t)
@@ -193,6 +215,16 @@ private:
 	int speed;
 	int points;
 	Trajectory traj;
+
+	bool check_confines(int x, int y)
+	{
+		int offset = 70;
+		if (rect->x + x + offset < displayMode.w && rect->x + x - offset > 0 && rect->y + y - offset < displayMode.h)
+			return true;
+		else if (rect->y + y > displayMode.h)
+			Player::makeDamage();
+		return false;
+	}
 public:
 	Enemy(SDL_Renderer* ren, SDL_Texture* texture, int points, int speed, Trajectory tr) : Object(ren, texture)
 	{
@@ -205,15 +237,6 @@ public:
 	{
 	}
 
-	bool check_confines(int x, int y)
-	{
-		int offset = 70;
-		if (rect->x + x + offset < displayMode.w && rect->x + x - offset > 0 && rect->y + y - offset < displayMode.h)
-				return true;
-		else if (rect->y + y > displayMode.h)
-			Player::makeDamage();
-		return false;
-	}
 
 	bool go()
 	{
@@ -240,10 +263,19 @@ public:
 
 class Shot : public Object
 {
+private:
 	ShotTr modificator;
 	int num;
 	bool invulnerability;
 	int speed;
+
+	virtual bool check_confines(int x, int y)
+	{
+		int offset = 250;
+		if (rect->y + y + offset > 0)
+			return true;
+		return false;
+	}
 public:
 	Shot(SDL_Renderer* ren, SDL_Texture* texture, int num) : Object(ren, texture)
 	{
@@ -268,14 +300,6 @@ public:
 	bool getInv()
 	{
 		return invulnerability;
-	}
-
-	virtual bool check_confines(int x, int y)
-	{
-		int offset = 250;
-		if (rect->y + y + offset > 0)
-			return true;
-		return false;
 	}
 
 	bool go()

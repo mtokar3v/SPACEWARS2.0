@@ -29,6 +29,7 @@ bool levelUp = true;
 int enemySpeed = 1;
 int spawnTime = 5;
 int wave = 1;
+double powerMulty = 1;
 SDL_Event event;
 const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
 std::string timeNow;
@@ -42,6 +43,10 @@ SDL_Texture* shot_texture;
 SDL_Texture* bonus_texture;
 SDL_Texture* heal_texture;
 SDL_Texture* spaceShop_texture;
+SDL_Texture* sparkle_texture;
+SDL_Texture* master_texture;
+SDL_Texture* master_damage_texture;
+SDL_Texture* rainbow_texture;
 TTF_Font* font;
 SDL_Color color;
 

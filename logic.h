@@ -85,25 +85,25 @@ void shoting(SDL_Event event, Player& player)
 		{
 		case RAY:
 		{
-			add_shot(ren, shot_texture, 0, -300, 10, displayMode.h / 2, 2, tr, player);
+			add_shot(ren, shot_texture, 0, -300, 10 * powerMulty, displayMode.h / 2, 2, tr, player);
 			break;
 		}
 		case TRIPLE:
 		{
-			add_shot(ren, shot_texture, 0, 0, 10, 18, 1, tr, player);
-			add_shot(ren, shot_texture, 0, 0, 10, 18, 2, tr, player);
-			add_shot(ren, shot_texture, 0, 0, 10, 18, 3, tr, player);
+			add_shot(ren, shot_texture, 0, 0, 10 * powerMulty, 18 * powerMulty, 1, tr, player);
+			add_shot(ren, shot_texture, 0, 0, 10 * powerMulty, 18 * powerMulty, 2, tr, player);
+			add_shot(ren, shot_texture, 0, 0, 10 * powerMulty, 18 * powerMulty, 3, tr, player);
 			break;
 		}
 		case DOUBLE:
 		{
-			add_shot(ren, shot_texture, 0, 0, 10, 18, 1, tr, player);
-			add_shot(ren, shot_texture, 0, 0, 10, 18, 3, tr, player);
+			add_shot(ren, shot_texture, 0, 0, 10 * powerMulty, 18 * powerMulty, 1, tr, player);
+			add_shot(ren, shot_texture, 0, 0, 10 * powerMulty, 18 * powerMulty, 3, tr, player);
 			break;
 		}
 		default:
 		{
-			add_shot(ren, shot_texture, 0, 0, 10, 18, 2, tr, player);
+			add_shot(ren, shot_texture, 0, 0, 10 * powerMulty, 18 * powerMulty, 2, tr, player);
 		}
 		}
 	}
@@ -114,17 +114,17 @@ void moving(Player& player)
 {
 	SDL_PumpEvents();
 
-	if (((keyboardState[SDL_SCANCODE_UP]) || (keyboardState[SDL_SCANCODE_W])) && player.check_confines(0, -player.playerSpeed()))
-		player.move(0, -player.playerSpeed());
+	if (((keyboardState[SDL_SCANCODE_UP]) || (keyboardState[SDL_SCANCODE_W])) && player.check_confines(0, -Player::playerSpeed()))
+		player.move(0, -Player::playerSpeed());
 
-	if (((keyboardState[SDL_SCANCODE_DOWN]) || (keyboardState[SDL_SCANCODE_S])) && player.check_confines(0, player.playerSpeed()))
-		player.move(0, player.playerSpeed());
+	if (((keyboardState[SDL_SCANCODE_DOWN]) || (keyboardState[SDL_SCANCODE_S])) && player.check_confines(0, Player::playerSpeed()))
+		player.move(0, Player::playerSpeed());
 
-	if (((keyboardState[SDL_SCANCODE_LEFT]) || (keyboardState[SDL_SCANCODE_A])) && player.check_confines(-player.playerSpeed(), 0))
-		player.move(-player.playerSpeed(), 0);
+	if (((keyboardState[SDL_SCANCODE_LEFT]) || (keyboardState[SDL_SCANCODE_A])) && player.check_confines(-Player::playerSpeed(), 0))
+		player.move(-Player::playerSpeed(), 0);
 
-	if (((keyboardState[SDL_SCANCODE_RIGHT]) || (keyboardState[SDL_SCANCODE_D])) && player.check_confines(player.playerSpeed(), 0))
-		player.move(player.playerSpeed(), 0);
+	if (((keyboardState[SDL_SCANCODE_RIGHT]) || (keyboardState[SDL_SCANCODE_D])) && player.check_confines(Player::playerSpeed(), 0))
+		player.move(Player::playerSpeed(), 0);
 
 }
 
@@ -247,13 +247,6 @@ void inputInfo(int time)
 	add_text(ren, font, color, mode, 80, 100);
 }
 
-//void create_object(int x, int y, int w, int h, SDL_Rect& rect, SDL_Texture* texture, std::string textureWay)
-//{
-//	rect = { x, y, w, h };
-//	texture = IMG_LoadTexture(ren, textureWay.c_str());
-//	SDL_RenderCopy(ren, texture, NULL, &rect);
-//}
-
 void add_shot(SDL_Renderer* ren, SDL_Texture* texture, int x, int y, int w, int h, int position, ShotTr tr, Player& player)
 {
 	Shot* someShot = new Shot(ren, texture, position);
@@ -294,30 +287,66 @@ bool isCrash(int x, int y, int w, int h)
 	return false;
 }
 
-void shopping(SDL_Renderer* ren, SDL_Texture*)
+void clearBattleArea()
+{
+	std::vector<Object*>::iterator at;
+	for (at = EnemyList.begin(); at != EnemyList.end(); at++)
+		(*at)->moveTo(-100, 0);
+}
+
+void shopping()
 {
 	bool run = true;
 	SDL_RenderClear(ren);
-	Object shop(ren, background_texture);
-	shop.resizeOn(w, h);
+	Object shop(ren, spaceShop_texture);
+	shop.resizeOn(displayMode.w,displayMode.h);
 	shop.render();
+	add_text(ren, font, color, "Point: ", 40, 60);
+	add_text(ren, font, color, std::to_string(Player::getPoints()), 80, 60);
 	SDL_RenderPresent(ren);
-
 
 
 	while (run)
 	{
-		SDL_PollEvent(&event);
-		switch (event.type)
-		{
-		case SDL_QUIT: run = false; break;
-		case SDL_MOUSEBUTTONDOWN:
-			if (event.button.button == SDL_BUTTON_LEFT && event.button.x <= 10 && event.button.y <= 10)
-				run = false; break;
-		case SDL_KEYDOWN:
-			if (event.key.keysym.sym == SDLK_ESCAPE)
-				run = false;
-			break;
+		while(SDL_PollEvent(&event))
+		{ 
+			switch (event.type)
+			{
+			case SDL_QUIT: run = false; break;
+			case SDL_MOUSEBUTTONDOWN:
+				//hp
+				if (event.button.button == SDL_BUTTON_LEFT && event.button.x <= 418 && event.button.x >= 143 && event.button.y <= 489 && event.button.y >= 212)
+				{
+					if (Player::spendPoints(5000))
+					{
+						Player::upMaxHealth(Player::getHealth() + 50);
+						Player::fullHealth();
+					}
+				}
+				//power
+				if (event.button.button == SDL_BUTTON_LEFT && event.button.x <= 776 && event.button.x >= 499 && event.button.y <= 485 && event.button.y >= 209)
+				{
+					if (Player::spendPoints(6000))
+						powerMulty += 0.3;
+				}
+				//speed
+				if (event.button.button == SDL_BUTTON_LEFT && event.button.x <= 1134 && event.button.x >= 859 && event.button.y <= 485 && event.button.y >= 209)
+				{
+					if (Player::spendPoints(2500))
+						Player::upSpeed(Player::playerSpeed() * 1.25);
+				}
+				break;
+			case SDL_KEYDOWN:
+				if (event.key.keysym.sym == SDLK_ESCAPE)
+					run = false;
+				break;
+			}
+			shop.render();
+			add_text(ren, font, color, "Point: ", 40, 60);
+			add_text(ren, font, color, std::to_string(Player::getPoints()), 80, 60);
+			SDL_RenderPresent(ren);
 		}
+
+		
 	}
 }

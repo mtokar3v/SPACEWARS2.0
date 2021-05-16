@@ -17,7 +17,7 @@ void setTextures()
 	enemy_textures[1] = IMG_LoadTexture(ren, "image//enemy2.png");
 	enemy_textures[2] = IMG_LoadTexture(ren, "image//enemy3.png");
 	enemy_textures[3] = IMG_LoadTexture(ren, "image//enemy4.png");
-
+	sparkle_texture = IMG_LoadTexture(ren, "image//sparkle.png");
 	//Пуля
 	shot_texture = IMG_LoadTexture(ren, "image//fire.png");//18x10
 
@@ -38,4 +38,9 @@ void setTextures()
 
 	//магазин
 	spaceShop_texture = IMG_LoadTexture(ren, "image//spaceshop.png");
+		
+	master_texture = IMG_LoadTexture(ren, "image//boss.png");
+	master_damage_texture = IMG_LoadTexture(ren, "image//bossDamage.png");
+
+	rainbow_texture = IMG_LoadTexture(ren, "image//rainbow.png");
 }

@@ -1,9 +1,6 @@
 #pragma once
 #include "logic.h"
-
-//Player::point = 0;
-//Player::health = 100;
-//ShotTr Player::tr = NONE;
+#include "dungeonMaster.h"
 
 void playCompany()
 {
@@ -15,6 +12,8 @@ void playCompany()
 	player.resizeOn(122, 165);
 	player.moveTo(displayMode.w / 2 - 61, displayMode.h - 165);
 	player.render();
+
+	Master* master = nullptr;
 
 	enemySpeed = 1;
 	spawnTime = 5;
@@ -45,30 +44,57 @@ void playCompany()
 		spawningBonus((int)t.elapsed(), bonusSpawn);
 		resetBonus((int)Player::getModificatorTime(), bonusRespawn);
 
-		//изменение настроек уровня и спавн аптечки
-		if (!((int)t.elapsed() % 30) && levelUp && (int)t.elapsed())
+		if (!((int)t.elapsed() % 30) && levelUp && (int)t.elapsed() && wave != 5)
 		{
 			wave++;
 			int x = rand() % displayMode.w;
 			int y = 0;
+			shopping();
+			t.reset();
+			clearBattleArea();
 			Player::fullHealth();
-			/*Heal* heal = new Heal(ren, heal_texture);
-			heal->moveTo(x, y);
-			heal->resizeOn(40, 40);
-			EnemyList.push_back(heal);*/
 			enemySpeed++;
 			spawnTime--;
 			levelUp = false;
+
+			if (wave == 5)
+			{
+				master = new Master(ren, master_texture, &player);
+				master->resizeOn(150, 150);
+				master->moveTo(0, 30);
+				master->render();
+			}
 		}
 		else if ((int)t.elapsed() % 30)
 			levelUp = true;
 
 		SDL_RenderClear(ren);
+		
+		
 		backgroung.render();
 		inputInfo((int)t.elapsed());
+		if (wave == 5)
+		{
+			spawnTime = 1;
+			master->active();
+			master->render();
+
+			if (master->isEnd())
+			{
+				std::cout << "you win!";
+				run = false;
+			}
+		}
+
 		player.render();
 
 		move_dimanic_object();
 		SDL_RenderPresent(ren);
 	}
+	SDL_Delay(15000);
+	if(master)
+		delete master;
+	powerMulty = 1;
+	Player::upMaxHealth(100);
+	Player::upSpeed(10);
 }
