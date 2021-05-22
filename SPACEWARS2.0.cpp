@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <time.h>
+#include <windows.h>
 #include <random>
 #include <chrono>
 #include <SDL.h>
@@ -26,6 +27,7 @@ ShotTr Player::tr = NONE;
 
 int main(int argc, char* argv[])
 {
+	ShowWindow(GetConsoleWindow(), SW_HIDE);
 	srand(time(0));
 	if (!init())
 		return 1;

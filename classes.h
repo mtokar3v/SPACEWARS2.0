@@ -14,7 +14,7 @@ enum Trajectory
 enum ShotTr
 {
 	NONE,
-	DOUBLE,			//выстрелы с двух сторон
+	DUET,			//выстрелы с двух сторон
 	TRIPLE,			//выстрелы  в три стороны
 	RAY,			//луч
 	SHOTCOUNT		//количество режимов стрельбы

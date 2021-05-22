@@ -114,7 +114,7 @@ void shoting(SDL_Event event, Player& player)
 			add_shot(ren, shot_texture, 0, 0, 10 * powerMulty, 18 * powerMulty, 3, tr, player);
 			break;
 		}
-		case DOUBLE:
+		case DUET:
 		{
 			add_shot(ren, shot_texture, 0, 0, 10 * powerMulty, 18 * powerMulty, 1, tr, player);
 			add_shot(ren, shot_texture, 0, 0, 10 * powerMulty, 18 * powerMulty, 3, tr, player);
@@ -258,7 +258,7 @@ void inputInfo(int time)
 	switch (Player::getModificator())
 	{
 	case NONE: mode = "NONE"; break;
-	case DOUBLE: mode = "DOUBLE"; break;
+	case DUET: mode = "DOUBLE"; break;
 	case TRIPLE: mode = "TRIPLE"; break;
 	case RAY: mode = "RAY"; break;
 	}
