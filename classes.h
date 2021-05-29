@@ -1,23 +1,24 @@
-#pragma once
+п»ї#ifndef CLASSES
+#define CLASSES
 #include "data.h"
 
 enum Trajectory
 {
-	LINE,		//прямая линия в сторону игрока
-	WALL,		//стенкой
-	SINUSOID,	//синусоида
-	COSINUSOID,	//косинусоида
+	LINE,		
+	WALL,		
+	SINUSOID,	
+	COSINUSOID,	
 	ARROW,
-	TRAJCOUNT	//количество траекторий
+	TRAJCOUNT	
 };
 
 enum ShotTr
 {
 	NONE,
-	DUET,			//выстрелы с двух сторон
-	TRIPLE,			//выстрелы  в три стороны
-	RAY,			//луч
-	SHOTCOUNT		//количество режимов стрельбы
+	DUET,
+	TRIPLE,
+	RAY,
+	SHOTCOUNT
 };
 
 class Timer
@@ -44,7 +45,7 @@ public:
 	}
 };
 
-class Object 
+class Object
 {
 protected:
 	SDL_Rect* rect;
@@ -62,10 +63,14 @@ public:
 
 	virtual bool check_confines(int x, int y)
 	{
-		int offset = 30;
-		if (rect->x + x + offset < displayMode.w && rect->x + x + offset > 0 && rect->y + y + offset < displayMode.h && rect->y + y + offset > 0)
+		if (rect->x + x + rect->w < displayMode.w && rect->x + x > 0 && rect->y + y + rect-> h < displayMode.h && rect->y + y > 0)
 			return true;
 		return false;
+	}
+
+	void change_textures(SDL_Texture* texture)
+	{
+		this->texture = texture;
 	}
 
 	void move(double x, double y)
@@ -112,7 +117,7 @@ public:
 		return rect->h;
 	}
 
-	void render()
+	virtual void render()
 	{
 		SDL_RenderCopy(ren, texture, NULL, rect);
 	}
@@ -125,46 +130,109 @@ public:
 
 };
 
+class Shot : public Object
+{
+private:
+	ShotTr modificator;
+	int num;
+	bool invulnerability;
+	int speed;
+	Player* player;
+
+	virtual bool check_confines(int x, int y);
+public:
+	Shot(SDL_Renderer* ren, SDL_Texture* texture, int num, Player* player);
+	ShotTr get_modificator();
+	void upgrade(ShotTr tr);
+	bool getInv();
+	bool go();
+};
+
+
 class Player : public Object
 {
 private:
-	static int speed;
-	static Timer* timer;
-	static int health;
-	static int maxHealth;
-	static int point;
-	static int totalPoint;
-	static ShotTr tr;
-public:
-	Player(SDL_Renderer* ren, SDL_Texture* texture) : Object(ren, texture)
+	int speed;
+	Timer* timer;
+	int health;
+	int maxHealth;
+	int point;
+	int totalPoint;
+	ShotTr tr;
+
+	SDL_Texture** fire_textures;//6 + 6
+	Object* fire[3]; // 2 + 1
+
+	void add_shot(SDL_Texture* texture, int x, int y, int w, int h, int position)
 	{
+		Shot* someShot = new Shot(ren, texture, position, this);
+		someShot->upgrade(tr);
+		someShot->move(x, y);
+		someShot->resizeOn(w, h);
+		ShotList.push_back(someShot);
 	}
-	static int playerSpeed()
+
+public:
+	Player(SDL_Renderer* ren, SDL_Texture* texture, SDL_Texture** fire_texture) : Object(ren, texture)
+	{
+		timer = new Timer;
+		point = 0;
+		totalPoint = 0;
+		health = 100;
+		maxHealth = 100;
+		speed = 10;
+		tr = NONE;
+
+		fire_textures = fire_texture;
+		fire[0] = new Object(ren, fire_texture[0]);
+		fire[0]->resize(12, 26);
+		fire[1] = new Object(ren, fire_texture[0]);
+		fire[1]->resize(12, 26);
+		fire[2] = new Object(ren, fire_texture[0]);
+		fire[2]->resize(16, 50);
+
+	}
+
+	void render(int i)
+	{
+		SDL_RenderCopy(ren, texture, NULL, rect);
+
+
+		fire[0]->change_textures(fire_textures[(i / 2) % 6]);
+		fire[1]->change_textures(fire_textures[(i / 2) % 6]);
+		fire[2]->change_textures(fire_textures[6 + ((i / 2) % 6)]);
+
+		fire[0]->render();
+		fire[1]->render();
+		fire[2]->render();
+	}
+
+	int playerSpeed()
 	{
 		return speed;
 	}
 
-	static void upSpeed(double tmp)
+	void upSpeed(double tmp)
 	{
 		speed = tmp;
 	}
 
-	static int getPoints()
+	int getPoints()
 	{
 		return point;
 	}
 
-	static void addTotalPoint(int s)
+	void addTotalPoint(int s)
 	{
 		totalPoint += s;
 	}
-	
-	static int getTotalPoint()
+
+	int getTotalPoint()
 	{
 		return totalPoint;
 	}
 
-	static bool spendPoints(int cash)
+	bool spendPoints(int cash)
 	{
 		if (cash <= point)
 		{
@@ -175,46 +243,100 @@ public:
 			return false;
 	}
 
-	static void makeDamage()
+	void makeDamage()
 	{
 		health -= 10;
 	}
 
-	static int getHealth()
+	int getHealth()
 	{
 		return health;
 	}
 
-	static void fullHealth()
+	void fullHealth()
 	{
 		health = maxHealth;
 	}
 
-	static void upMaxHealth(int tmp)
+	void upMaxHealth(int tmp)
 	{
 		maxHealth = tmp;
 	}
 
-	static void setModificator(ShotTr t)
+	void setModificator(ShotTr t)
 	{
 		timer->reset();
 		tr = t;
 	}
 
-	static double getModificatorTime()
+	double getModificatorTime()
 	{
 		return timer->elapsed();
-		
 	}
 
-	static ShotTr getModificator()
+	ShotTr get_modificator()
 	{
 		return tr;
 	}
 
-	static void addPoint(int somePoint)
+	void addPoint(int somePoint)
 	{
 		point += somePoint;
+	}
+
+	void shoting(SDL_Event event)
+	{
+		if (event.key.keysym.sym == SDLK_SPACE)
+		{
+			switch (tr)
+			{
+			case RAY:
+			{
+				if ((ShotList.empty() || dynamic_cast<Shot*>(ShotList.back())->get_modificator() != RAY))
+					add_shot(ray_texture, get_x(), get_y(), 10 * powerMulty, 18, 2);
+				break;
+			}
+			case TRIPLE:
+			{
+				add_shot(shot_texture, get_x() + 10, get_y() + 75, 10 * powerMulty, 18 * powerMulty, 1);
+				add_shot(shot_texture, get_x(), get_y(), 10 * powerMulty, 18 * powerMulty, 2);
+				add_shot(shot_texture, get_x() - 10, get_y() + 75, 10 * powerMulty, 18 * powerMulty, 3);
+				break;
+			}
+			case DUET:
+			{
+				add_shot(shot_texture, get_x() + 10, get_y() + 75, 10 * powerMulty, 18 * powerMulty, 1);
+				add_shot(shot_texture, get_x() - 10, get_y() + 75, 10 * powerMulty, 18 * powerMulty, 3);
+				break;
+			}
+			default:
+			{
+				add_shot(shot_texture, get_x(), get_y(), 10 * powerMulty, 18 * powerMulty, 2);
+			}
+			}
+		}
+	}
+
+	void moving()
+	{
+		SDL_PumpEvents();
+
+		if (((keyboardState[SDL_SCANCODE_UP]) || (keyboardState[SDL_SCANCODE_W])) && check_confines(0, -speed))
+			move(0, -speed);
+
+		if (((keyboardState[SDL_SCANCODE_DOWN]) || (keyboardState[SDL_SCANCODE_S])) && check_confines(0, speed))
+			move(0, speed);
+
+		if (((keyboardState[SDL_SCANCODE_LEFT]) || (keyboardState[SDL_SCANCODE_A])) && check_confines(-speed, 0))
+			move(-speed, 0);
+
+		if (((keyboardState[SDL_SCANCODE_RIGHT]) || (keyboardState[SDL_SCANCODE_D])) && check_confines(speed, 0))
+			move(speed, 0);
+
+		fire[0]->moveTo(get_x() + 20, get_y() + get_h() - 46);
+		fire[1]->moveTo(get_x() + get_w() - 34, get_y() + get_h() - 46);
+		fire[2]->moveTo(get_x() + get_w() / 2 - 9, get_y() + get_h() - 28);
+
 	}
 };
 
@@ -223,23 +345,28 @@ class Enemy : public Object
 private:
 	int speed;
 	int points;
+	Player* player;
 	Trajectory traj;
+	int i;
 
 	bool check_confines(int x, int y)
 	{
 		int offset = 30;
-		if (rect->x + x < displayMode.w && rect->x + x > 0 && rect->y + y - offset < displayMode.h	)
+		if (rect->x + x < displayMode.w && rect->x + x > 0 && rect->y + y - offset < displayMode.h)
 			return true;
 		else if (rect->y + y > displayMode.h)
-			Player::makeDamage();
+			player->makeDamage();
 		return false;
 	}
+
 public:
-	Enemy(SDL_Renderer* ren, SDL_Texture* texture, int points, int speed, Trajectory tr) : Object(ren, texture)
+	Enemy(SDL_Renderer* ren, SDL_Texture* texture, int points, int speed, Trajectory tr, Player* pl) : Object(ren, texture)
 	{
+		player = pl;
 		this->points = points;
 		this->speed = speed;
 		traj = tr;
+		i = 0;
 	}
 
 	~Enemy()
@@ -254,13 +381,22 @@ public:
 		case COSINUSOID: move(cos(rect->y / 10) * 8, speed); break;
 		default: move(0, speed); break;
 		}
-		
+
 		if (check_confines(0, speed))
 		{
-			if (isCrash(rect->x, rect->y, rect->w, rect->h))
+			if (isCrash(rect->x, rect->y, rect->w, rect->h) || i)
 			{
-				Player::addTotalPoint(points);
-				Player::addPoint(points);
+				if (i != 7)
+				{
+					change_textures(boom_texture[i++]);
+					render();
+					return true;
+				}
+				else
+				{
+					player->addTotalPoint(points);
+					player->addPoint(points);
+				}
 			}
 			else
 			{
@@ -272,82 +408,18 @@ public:
 	}
 };
 
-class Shot : public Object
-{
-private:
-	ShotTr modificator;
-	int num;
-	bool invulnerability;
-	int speed;
 
-	virtual bool check_confines(int x, int y)
-	{
-		int offset = 250;
-		if (rect->y + y + offset > 0)
-			return true;
-		return false;
-	}
-public:
-	Shot(SDL_Renderer* ren, SDL_Texture* texture, int num) : Object(ren, texture)
-	{
-		modificator = NONE;
-		invulnerability = false;
-		this->num = num;
-		switch (num)
-		{
-		case 2: rect->x += 55; break;
-		case 3: rect->x += 110; break;
-		}
-		speed = 7;
-	}
-	~Shot()
-	{
-	}
-	void upgrade(ShotTr tr)
-	{
-		modificator = tr;
-	}
-
-	bool getInv()
-	{
-		return invulnerability;
-	}
-
-	bool go()
-	{
-		if (modificator == RAY)
-			invulnerability = true;
-		
-		if (modificator == TRIPLE)
-		{
-			switch (num)
-			{
-			case 1: move(-5, -speed); break;
-			case 2: move( 0, -speed); break;
-			case 3: move(5, -speed); break;
-			}
-		}
-		else
-			move(0, -speed);
-		
-		if (check_confines(0, -speed) )
-		{
-			render();
-			return true;
-		}
-		else
-			return false;
-	}
-};
 
 class Heal : public Object
 {
 protected:
 	int speed;
+	Player* player;
 public:
-	Heal(SDL_Renderer* ren, SDL_Texture* texture) : Object(ren, texture)
+	Heal(SDL_Renderer* ren, SDL_Texture* texture, Player* pl) : Object(ren, texture)
 	{
 		speed = 2;
+		player = pl;
 	}
 	virtual ~Heal()
 	{
@@ -360,7 +432,7 @@ public:
 		{
 			if (isCrash(rect->x, rect->y, rect->w, rect->h))
 			{
-				Player::fullHealth();
+				player->fullHealth();
 				return false;
 			}
 			else
@@ -377,10 +449,10 @@ class Bonus : public Heal
 private:
 	ShotTr tr;
 public:
-	Bonus(SDL_Renderer* ren, SDL_Texture* texture, ShotTr tr) : Heal(ren, texture)
+	Bonus(SDL_Renderer* ren, SDL_Texture* texture, Player* pl, ShotTr tr) : Heal(ren, texture, pl)
 	{
 		this->tr = tr;
-	}	
+	}
 	~Bonus()
 	{
 	}
@@ -392,7 +464,7 @@ public:
 		{
 			if (isCrash(rect->x, rect->y, rect->w, rect->h))
 			{
-				Player::setModificator(tr);
+				player->setModificator(tr);
 				return false;
 			}
 			else
@@ -404,3 +476,5 @@ public:
 	}
 };
 
+#include "methods.inl"
+#endif CLASSES

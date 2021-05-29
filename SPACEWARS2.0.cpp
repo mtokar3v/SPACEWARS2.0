@@ -17,17 +17,10 @@
 #include "company.h"
 #include "dungeonMaster.h"
 
-int Player::point = 0;
-int Player::totalPoint = 0;
-int Player::health = 100;
-int Player::maxHealth = 100;
-int Player::speed = 10;
-ShotTr Player::tr = NONE;
-
 
 int main(int argc, char* argv[])
 {
-	ShowWindow(GetConsoleWindow(), SW_HIDE);
+	//ShowWindow(GetConsoleWindow(), SW_HIDE);
 	srand(time(0));
 	if (!init())
 		return 1;

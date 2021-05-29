@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "classes.h"
 
 class Rainbow : public Object
@@ -7,7 +7,7 @@ private:
 	Player* player;
 
 public:
-	Rainbow(SDL_Renderer* ren, SDL_Texture* texture, Player* player) : Object(ren, texture) 
+	Rainbow(SDL_Renderer* ren, SDL_Texture* texture, Player* player) : Object(ren, texture)
 	{
 		this->player = player;
 	}
@@ -19,7 +19,7 @@ public:
 		if (check_confines(0, rect->h))
 		{
 			if (rect->x <= player->get_x() + player->get_w() && rect->x >= player->get_x() - player->get_w() && rect->h >= player->get_y())
-				Player::makeDamage();
+				player->makeDamage();
 			render();
 			return true;
 		}
@@ -43,7 +43,7 @@ private:
 
 	void sparkle()
 	{
-		spawningEnemy((int)t->elapsed(), spawnTime, starSpawn);
+		spawningEnemy((int)t->elapsed(), spawnTime, starSpawn, player);
 	}
 
 	void getDamage()
@@ -88,9 +88,9 @@ private:
 			rainbowSpawn = false;
 		}
 
-		//ïðè íàåçäå íà áîññà æèçíè òðàòÿòñÿ 
+		//Ã¯Ã°Ã¨ Ã­Ã Ã¥Ã§Ã¤Ã¥ Ã­Ã  Ã¡Ã®Ã±Ã±Ã  Ã¦Ã¨Ã§Ã­Ã¨ Ã²Ã°Ã Ã²Ã¿Ã²Ã±Ã¿ 
 		if (rect->x <= player->get_x() + player->get_w() && rect->x >= player->get_x() - player->get_w() && rect->h >= player->get_y())
-			Player::makeDamage();
+			player->makeDamage();
 
 		if (!((int)t->elapsed() % 5))
 			rainbowSpawn = true;

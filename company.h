@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 #include "logic.h"
 #include "dungeonMaster.h"
 
@@ -8,10 +8,10 @@ void playCompany()
 	backgroung.resizeOn(displayMode.w, displayMode.h);
 	backgroung.render();
 
-	Player player(ren, player_texture);
+	Player player(ren, player_texture, fire_texture);
 	player.resizeOn(122, 165);
 	player.moveTo(displayMode.w / 2 - 61, displayMode.h - 165);
-	player.render();
+	player.render(0);
 
 	Master* master = nullptr;
 
@@ -21,61 +21,88 @@ void playCompany()
 	Timer t;
 	while (run)
 	{
-		//чтобы замедлить обработку и движение корабля
-		SDL_Delay(30);
-		//считывались все эвенты, даже одновременные, поэтому можно бегать о диагонали 
-		SDL_PollEvent(&event);
-
-		shoting(event, player);
-		if (event.key.keysym.sym == SDLK_q)
-			run = false;
-		moving(player);
-
-		spawningEnemy((int)t.elapsed(), spawnTime, enemySpawn);
-		spawningBonus((int)t.elapsed(), bonusSpawn);
-		resetBonus((int)Player::getModificatorTime(), bonusRespawn);
-
-		if (!((int)t.elapsed() % 30) && levelUp && (int)t.elapsed() && wave != 5)
+		for (int i = 0; i < 60; i++)
 		{
-			wave++;
-			int x = rand() % displayMode.w;
-			int y = 0;
-			shopping();
-			t.reset();
-			clearBattleArea();
-			Player::fullHealth();
-			enemySpeed++;
-			spawnTime--;
-			levelUp = false;
+			//Г·ГІГ®ГЎГ» Г§Г Г¬ГҐГ¤Г«ГЁГІГј Г®ГЎГ°Г ГЎГ®ГІГЄГі ГЁ Г¤ГўГЁГ¦ГҐГ­ГЁГҐ ГЄГ®Г°Г ГЎГ«Гї
+			SDL_Delay(30);
+			//Г±Г·ГЁГІГ»ГўГ Г«ГЁГ±Гј ГўГ±ГҐ ГЅГўГҐГ­ГІГ», Г¤Г Г¦ГҐ Г®Г¤Г­Г®ГўГ°ГҐГ¬ГҐГ­Г­Г»ГҐ, ГЇГ®ГЅГІГ®Г¬Гі Г¬Г®Г¦Г­Г® ГЎГҐГЈГ ГІГј Г® Г¤ГЁГ ГЈГ®Г­Г Г«ГЁ 
+			SDL_PollEvent(&event);
 
+			player.shoting(event);
+			player.moving();
+
+			if (event.key.keysym.sym == SDLK_q)
+				run = false;
+
+
+			spawningEnemy((int)t.elapsed(), spawnTime, enemySpawn, &player);
+			spawningBonus((int)t.elapsed(), bonusSpawn, &player);
+			resetBonus((int)player.getModificatorTime(), bonusRespawn, &player);
+
+			if (!((int)t.elapsed() % 30) && levelUp && (int)t.elapsed() && wave != 5)
+			{
+				wave++;
+				int x = rand() % displayMode.w;
+				int y = 0;
+				shopping(&player);
+				t.reset();
+				clearBattleArea();
+				player.fullHealth();
+				enemySpeed++;
+				spawnTime--;
+				levelUp = false;
+
+				if (wave == 5)
+				{
+					master = new Master(ren, master_texture, &player);
+					master->resizeOn(150, 150);
+					master->moveTo(0, 30);
+					master->render();
+				}
+			}
+			else if ((int)t.elapsed() % 30)
+				levelUp = true;
+
+			SDL_RenderClear(ren);
+
+			backgroung.render();
+			inputInfo((int)t.elapsed(), &player);
 			if (wave == 5)
 			{
-				master = new Master(ren, master_texture, &player);
-				master->resizeOn(150, 150);
-				master->moveTo(0, 30);
+				spawnTime = 1;
+				master->active();
 				master->render();
+
+				if (master->isEnd())
+				{
+					SDL_RenderClear(ren);
+					backgroung.render();
+					add_text(ren, bigFont, color, "YOU WIN", displayMode.w * 0.45, displayMode.h * 0.45);
+					add_text(ren, font, color, "total point: ", displayMode.w * 0.45, displayMode.h * 0.55);
+					add_text(ren, font, color, std::to_string(player.getTotalPoint()), displayMode.w * 0.53, displayMode.h * 0.55);
+					SDL_RenderPresent(ren);
+					while (run)
+					{
+						SDL_PollEvent(&event);
+						if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
+							run = false;
+					}
+					SDL_RenderClear(ren);
+				}
 			}
-		}
-		else if ((int)t.elapsed() % 30)
-			levelUp = true;
 
-		SDL_RenderClear(ren);
-		
-		backgroung.render();
-		inputInfo((int)t.elapsed());
-		if (wave == 5)
-		{
-			spawnTime = 1;
-			master->active();
-			master->render();
+			player.render(i);
 
-			if (master->isEnd())
+			move_dimanic_object();
+			SDL_RenderPresent(ren);
+
+			if (player.getHealth() <= 0)
 			{
 				SDL_RenderClear(ren);
 				backgroung.render();
-				add_text(ren, bigFont, color, "YOU WIN", displayMode.w * 0.45, displayMode.h * 0.45);
+				add_text(ren, bigFont, color, "YOU LOSE", displayMode.w * 0.45, displayMode.h * 0.45);
 				add_text(ren, font, color, "total point: ", displayMode.w * 0.45, displayMode.h * 0.55);
-				add_text(ren, font, color, std::to_string(Player::getTotalPoint()), displayMode.w * 0.53, displayMode.h * 0.55);
+				add_text(ren, font, color, std::to_string(player.getTotalPoint()), displayMode.w * 0.53, displayMode.h * 0.55);
 				SDL_RenderPresent(ren);
 				while (run)
 				{
@@ -86,38 +113,16 @@ void playCompany()
 				SDL_RenderClear(ren);
 			}
 		}
-
-		player.render();
-
-		move_dimanic_object();
-		SDL_RenderPresent(ren);
-
-		if (Player::getHealth() <= 0)
-		{
-			SDL_RenderClear(ren);
-			backgroung.render();
-			add_text(ren, bigFont, color, "YOU LOSE", displayMode.w * 0.45, displayMode.h * 0.45);
-			add_text(ren, font, color, "total point: ", displayMode.w * 0.45, displayMode.h * 0.55);
-			add_text(ren, font, color, std::to_string(Player::getTotalPoint()), displayMode.w * 0.53, displayMode.h * 0.55);
-			SDL_RenderPresent(ren);
-			while (run)
-			{
-				SDL_PollEvent(&event);
-				if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
-					run = false;
-			}
-			SDL_RenderClear(ren);
-		}
 	}
 
-	if(master)
+	if (master)
 		delete master;
 	powerMulty = 1;
-	Player::spendPoints(Player::getPoints());
-	Player::addTotalPoint(-Player::getTotalPoint());
-	Player::upMaxHealth(100);
-	Player::fullHealth();
-	Player::upSpeed(10);
+	player.spendPoints(player.getPoints());
+	player.addTotalPoint(-player.getTotalPoint());
+	player.upMaxHealth(100);
+	player.fullHealth();
+	player.upSpeed(10);
 	clearBattleArea();
 	wave = 1;
 	run = true;
