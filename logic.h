@@ -230,7 +230,7 @@ bool isCrash(int x, int y, int w, int h)
 {
 	std::vector<Object*>::iterator at;
 	for (at = ShotList.begin(); at != ShotList.end(); at++)
-		if ((**at).get_x() + (**at).get_w() <= x + w && (**at).get_x() >= x && (**at).get_y() >= y && (**at).get_y() + (**at).get_h() <= y + h)
+		if ((**at).get_x() <= x + w && (**at).get_x() + (**at).get_w() >= x && (**at).get_y() + (**at).get_h() >= y && (**at).get_y()  <= y + h)
 		{
 			std::cout << "!";
 			if (!(dynamic_cast<Shot*>(*at))->getInv())
