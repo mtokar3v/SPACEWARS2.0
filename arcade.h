@@ -54,8 +54,8 @@ void playArcade()
 				heal->moveTo(x, y);
 				heal->resizeOn(40, 40);
 				EnemyList.push_back(heal);
-				enemySpeed = rand() % 4 + 2;
-				spawnTime = rand() % 3 + 1;
+				enemySpeed = rand() % 5 + 1;
+				spawnTime = rand() % 4 + 2;
 				levelUp = false;
 			}
 			else if ((int)t.elapsed() % 30)
