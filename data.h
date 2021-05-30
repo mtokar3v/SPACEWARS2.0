@@ -11,6 +11,7 @@ const int h = displayMode.h;
 //####### CLASSES ########
 enum Trajectory;
 enum ShotTr;
+class Boom;
 class Object;
 class Shot;
 class Enemy;
@@ -36,6 +37,7 @@ std::string timeNow;
 
 std::vector<Object*> ShotList;
 std::vector<Object*> EnemyList;
+std::vector<Object*> BoomList;
 std::vector<SDL_Texture*> enemy_textures;
 SDL_Texture* background_texture;
 SDL_Texture* mainMenu_texture;

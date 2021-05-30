@@ -153,12 +153,11 @@
     <ClInclude Include="data.h" />
     <ClInclude Include="company.h" />
     <ClInclude Include="dungeonMaster.h" />
-    <ClInclude Include="player.h" />
     <ClInclude Include="textures.h" />
     <ClInclude Include="logic.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="methods.inl" />
+    <None Include="methods.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

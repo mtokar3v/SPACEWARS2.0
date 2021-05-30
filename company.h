@@ -8,6 +8,10 @@ void playCompany()
 	backgroung.resizeOn(displayMode.w, displayMode.h);
 	backgroung.render();
 
+	Object backgroung2(ren, background_texture);
+	backgroung2.resizeOn(displayMode.w, displayMode.h);
+	backgroung2.move(0, -displayMode.h);
+
 	Player player(ren, player_texture, fire_texture);
 	player.resizeOn(122, 165);
 	player.moveTo(displayMode.w / 2 - 61, displayMode.h - 165);
@@ -21,11 +25,20 @@ void playCompany()
 	Timer t;
 	while (run)
 	{
-		for (int i = 0; i < 60; i++)
+		for (int i = 0; i < 60 && run; i++)
 		{
-			//÷òîáû çàìåäëèòü îáðàáîòêó è äâèæåíèå êîðàáëÿ
+			if (!(i % 2))
+			{
+				backgroung.move(0, 1);
+				backgroung2.move(0, 1);
+			}
+			if (backgroung.get_y() > displayMode.h)
+				backgroung.move(0, -(2 * displayMode.h));
+
+			if (backgroung2.get_y() > displayMode.h)
+				backgroung2.move(0, -(2 * displayMode.h));
+
 			SDL_Delay(30);
-			//ñ÷èòûâàëèñü âñå ýâåíòû, äàæå îäíîâðåìåííûå, ïîýòîìó ìîæíî áåãàòü î äèàãîíàëè 
 			SDL_PollEvent(&event);
 
 			player.shoting(event);
@@ -35,7 +48,7 @@ void playCompany()
 				run = false;
 
 
-			spawningEnemy((int)t.elapsed(), spawnTime, enemySpawn, &player);
+			spawningEnemy((int)t.elapsed(), spawnTime, enemySpawn, &player, boom_texture);
 			spawningBonus((int)t.elapsed(), bonusSpawn, &player);
 			resetBonus((int)player.getModificatorTime(), bonusRespawn, &player);
 
@@ -66,7 +79,9 @@ void playCompany()
 			SDL_RenderClear(ren);
 
 			backgroung.render();
+			backgroung2.render();
 			inputInfo((int)t.elapsed(), &player);
+
 			if (wave == 5)
 			{
 				spawnTime = 1;

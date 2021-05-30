@@ -44,31 +44,41 @@ ShotTr Shot::get_modificator()
 
 bool Shot::go()
 {
-	if (modificator == RAY)
+
+	switch (modificator)
 	{
-		
-		moveTo(player->get_x() + 55,player->get_y() - rect->h + 30);
-		if (rect->y > 0)
-			resize(0, 3*speed);
+	case RAY:
 		if (player->get_modificator() == RAY)
 		{
+			moveTo(player->get_x() + 55, player->get_y() - rect->h + 30);
+			if (rect->y > 0)
+				resize(0, 2 * speed);
 			render();
 			return true;
 		}
-	}
-	else
-		if (modificator == TRIPLE)
+
+		if (rect->h > 0)
 		{
-			switch (num)
-			{
-			case 1: move(-5, -speed); break;
-			case 2: move(0, -speed); break;
-			case 3: move(5, -speed); break;
-			}
+			resize(0, -2 * speed);
+			render();
+			return true;
 		}
 		else
-			move(0, -speed);
-
+		{
+			moveTo(0, -displayMode.h);
+		}
+		break;
+	case TRIPLE:
+		switch (num)
+		{
+		case 1: move(-5, -speed); break;
+		case 2: move(0, -speed); break;
+		case 3: move(5, -speed); break;
+		}
+		break;
+	default:move(0, -speed);
+	}
+	
 	if (check_confines(0, -speed))
 	{
 		render();

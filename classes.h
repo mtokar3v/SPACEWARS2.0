@@ -172,6 +172,14 @@ private:
 		ShotList.push_back(someShot);
 	}
 
+	bool check_confines(int x, int y)
+	{
+		int offset = 100;
+		if (rect->x + x + rect->w - offset < displayMode.w && rect->x + x + offset> 0 && rect->y + y + rect->h - offset < displayMode.h && rect->y + y + offset> 0)
+			return true;
+		return false;
+	}
+
 public:
 	Player(SDL_Renderer* ren, SDL_Texture* texture, SDL_Texture** fire_texture) : Object(ren, texture)
 	{
@@ -196,7 +204,6 @@ public:
 	void render(int i)
 	{
 		SDL_RenderCopy(ren, texture, NULL, rect);
-
 
 		fire[0]->change_textures(fire_textures[(i / 2) % 6]);
 		fire[1]->change_textures(fire_textures[(i / 2) % 6]);
@@ -340,6 +347,33 @@ public:
 	}
 };
 
+class Boom :public Object
+{
+private:
+	int i;
+	SDL_Texture** boom_texture;
+public:
+	Boom(SDL_Renderer* ren, SDL_Texture** t, int x, int y, int w, int h) : Object(ren, t[0])
+	{
+		move(x, y);
+		resize(w, h);
+		boom_texture = t;
+		i = 0;
+	}
+
+	bool go()
+	{
+		if ((i/2) < 7)
+		{
+			change_textures(boom_texture[i++ / 2]);
+			render();
+			return true;
+		}
+		else
+			return false;
+	}
+};
+
 class Enemy : public Object
 {
 private:
@@ -347,12 +381,12 @@ private:
 	int points;
 	Player* player;
 	Trajectory traj;
-	int i;
+	SDL_Texture** boom_texture;
 
 	bool check_confines(int x, int y)
 	{
 		int offset = 30;
-		if (rect->x + x < displayMode.w && rect->x + x > 0 && rect->y + y - offset < displayMode.h)
+		if (rect->x + x + rect->w + offset < displayMode.w && rect->x + x - offset> 0 && rect->y + y - offset < displayMode.h)
 			return true;
 		else if (rect->y + y > displayMode.h)
 			player->makeDamage();
@@ -360,13 +394,13 @@ private:
 	}
 
 public:
-	Enemy(SDL_Renderer* ren, SDL_Texture* texture, int points, int speed, Trajectory tr, Player* pl) : Object(ren, texture)
+	Enemy(SDL_Renderer* ren, SDL_Texture* texture, int points, int speed, Trajectory tr, Player* pl, SDL_Texture** t) : Object(ren, texture)
 	{
 		player = pl;
+		boom_texture = t;
 		this->points = points;
 		this->speed = speed;
 		traj = tr;
-		i = 0;
 	}
 
 	~Enemy()
@@ -384,19 +418,11 @@ public:
 
 		if (check_confines(0, speed))
 		{
-			if (isCrash(rect->x, rect->y, rect->w, rect->h) || i)
+			if (isCrash(rect->x, rect->y, rect->w, rect->h))
 			{
-				if (i != 7)
-				{
-					change_textures(boom_texture[i++]);
-					render();
-					return true;
-				}
-				else
-				{
-					player->addTotalPoint(points);
-					player->addPoint(points);
-				}
+				BoomList.push_back(new Boom(ren, boom_texture, rect->x, rect->y, rect->w, rect->h));
+				player->addTotalPoint(points);
+				player->addPoint(points);
 			}
 			else
 			{
@@ -407,7 +433,6 @@ public:
 		return false;
 	}
 };
-
 
 
 class Heal : public Object
@@ -476,5 +501,5 @@ public:
 	}
 };
 
-#include "methods.inl"
+#include "methods.cpp"
 #endif CLASSES

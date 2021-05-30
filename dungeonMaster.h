@@ -16,14 +16,21 @@ public:
 	{
 		resize(0, 10);
 
-		if (check_confines(0, rect->h))
+		if (check_confines(0, 10))
 		{
 			if (rect->x <= player->get_x() + player->get_w() && rect->x >= player->get_x() - player->get_w() && rect->h >= player->get_y())
 				player->makeDamage();
 			render();
 			return true;
 		}
-		else
+		else if (rect->y < displayMode.h)
+		{
+			move(0, 10);
+			if (rect->x <= player->get_x() + player->get_w() && rect->x >= player->get_x() - player->get_w() && rect->h >= player->get_y())
+				player->makeDamage();
+			render();
+			return true;
+		}
 			return false;
 	}
 };
@@ -43,7 +50,7 @@ private:
 
 	void sparkle()
 	{
-		spawningEnemy((int)t->elapsed(), spawnTime, starSpawn, player);
+		spawningEnemy((int)t->elapsed(), spawnTime, starSpawn, player, boom_texture);
 	}
 
 	void getDamage()
@@ -66,13 +73,13 @@ private:
 			spawnTime = 7;
 			speed = 4;
 		}
-
+		else
 		if (hp < 300)
 		{
 			spawnTime = 2;
 			speed = 10;
 		}
-
+		else
 		if (hp <= 0)
 			end = true;
 	}

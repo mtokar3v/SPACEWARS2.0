@@ -18,7 +18,7 @@ void playArcade()
 	Timer t;
 	while (run)
 	{
-		for (int i = 0; i < 60; i++)
+		for (int i = 0; i < 60 && run; i++)
 		{
 			if (!(i % 2))
 			{
@@ -40,9 +40,7 @@ void playArcade()
 			if (event.key.keysym.sym == SDLK_q)
 				run = false;
 
-			
-
-			spawningEnemy((int)t.elapsed(), spawnTime, enemySpawn, &player);
+			spawningEnemy((int)t.elapsed(), spawnTime, enemySpawn, &player, boom_texture);
 			spawningBonus((int)t.elapsed(), bonusSpawn, &player);
 			resetBonus((int)player.getModificatorTime(), bonusRespawn, &player);
 

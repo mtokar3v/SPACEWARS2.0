@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "textures.h"
 #include "classes.h"
-#include "player.h"
 
 bool init()
 {
@@ -86,6 +85,17 @@ void move_dimanic_object()
 				return false; });
 	ShotList.erase(newEnd, ShotList.end());
 
+	newEnd = std::remove_if(BoomList.begin(), BoomList.end(),
+		[&copy](Object* tmp) {
+			if (!tmp->go())
+			{
+				copy.push_back(tmp);
+				return true;
+			}
+			else
+				return false; });
+	BoomList.erase(newEnd, BoomList.end());
+
 	std::vector<Object*>::iterator at;
 	for (at = copy.begin(); at != copy.end(); at++)
 		delete (*at);
@@ -93,7 +103,7 @@ void move_dimanic_object()
 	copy.clear();
 }
 
-void spawningEnemy(int time, int spawnTime, bool& enemySpawn, Player* player)
+void spawningEnemy(int time, int spawnTime, bool& enemySpawn, Player* player, SDL_Texture** boom_t)
 {
 	if (!(time % spawnTime) && enemySpawn)
 	{
@@ -110,7 +120,7 @@ void spawningEnemy(int time, int spawnTime, bool& enemySpawn, Player* player)
 			{
 			case WALL:
 			{
-				Enemy* someEnemy = new Enemy(ren, enemy_textures[1], 100, enemySpeed, tr, player);
+				Enemy* someEnemy = new Enemy(ren, enemy_textures[1], 100, enemySpeed, tr, player, boom_t);
 				someEnemy->moveTo(x += 30, y -= 30);
 				someEnemy->resizeOn(24, 24);
 				EnemyList.push_back(someEnemy);
@@ -118,7 +128,7 @@ void spawningEnemy(int time, int spawnTime, bool& enemySpawn, Player* player)
 			}
 			case ARROW:
 			{
-				Enemy* someEnemy = new Enemy(ren, enemy_textures[0], 200, enemySpeed + 1, tr, player);
+				Enemy* someEnemy = new Enemy(ren, enemy_textures[0], 200, enemySpeed + 1, tr, player, boom_t);
 				if (i % 2)
 					someEnemy->moveTo(x += 15 * i, y -= 30);
 				else
@@ -130,7 +140,7 @@ void spawningEnemy(int time, int spawnTime, bool& enemySpawn, Player* player)
 			}
 			case LINE:
 			{
-				Enemy* someEnemy = new Enemy(ren, enemy_textures[2], 50, enemySpeed, tr, player);
+				Enemy* someEnemy = new Enemy(ren, enemy_textures[2], 50, enemySpeed, tr, player, boom_t);
 				someEnemy->moveTo(x, y -= 30);
 				someEnemy->resizeOn(24, 24);
 				EnemyList.push_back(someEnemy);
@@ -139,7 +149,7 @@ void spawningEnemy(int time, int spawnTime, bool& enemySpawn, Player* player)
 			//sin & cos
 			default:
 			{
-				Enemy* someEnemy = new Enemy(ren, enemy_textures[3], 200, enemySpeed + 2, tr, player);
+				Enemy* someEnemy = new Enemy(ren, enemy_textures[3], 200, enemySpeed + 2, tr, player, boom_t);
 				someEnemy->moveTo(x, y -= 30);
 				someEnemy->resizeOn(24, 24);
 				EnemyList.push_back(someEnemy);
@@ -232,7 +242,6 @@ bool isCrash(int x, int y, int w, int h)
 	for (at = ShotList.begin(); at != ShotList.end(); at++)
 		if ((**at).get_x() <= x + w && (**at).get_x() + (**at).get_w() >= x && (**at).get_y() + (**at).get_h() >= y && (**at).get_y()  <= y + h)
 		{
-			std::cout << "!";
 			if (!(dynamic_cast<Shot*>(*at))->getInv())
 				(**at).moveTo(-10, 0);
 			return true;

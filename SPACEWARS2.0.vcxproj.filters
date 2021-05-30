@@ -41,12 +41,9 @@
     <ClInclude Include="dungeonMaster.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="player.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="methods.inl">
+    <None Include="methods.cpp">
       <Filter>Файлы заголовков</Filter>
     </None>
   </ItemGroup>
