@@ -1,6 +1,22 @@
-#ifndef METHODS
-#define METHODS
-#include "classes.h"
+#pragma once
+
+class Shot : public Object
+{
+private:
+	ShotTr modificator;
+	int num;
+	bool invulnerability;
+	int speed;
+	Player* player;
+	virtual bool check_confines(int x, int y);
+public:
+	Shot(SDL_Renderer* ren, SDL_Texture* texture, int num, Player* player);
+	ShotTr get_modificator();
+	void upgrade(ShotTr tr);
+	bool getInv();
+	bool go();
+};
+
 Shot::Shot(SDL_Renderer* ren, SDL_Texture* texture, int num, Player* player) : Object(ren, texture)
 {
 	modificator = NONE;
@@ -78,7 +94,7 @@ bool Shot::go()
 		break;
 	default:move(0, -speed);
 	}
-	
+
 	if (check_confines(0, -speed))
 	{
 		render();
@@ -87,4 +103,3 @@ bool Shot::go()
 	else
 		return false;
 }
-#endif METHODS

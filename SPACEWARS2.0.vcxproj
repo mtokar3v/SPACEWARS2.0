@@ -148,16 +148,23 @@
     <ClCompile Include="SPACEWARS2.0.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="classes.h" />
+    <ClInclude Include="boom.h" />
     <ClInclude Include="arcade.h" />
     <ClInclude Include="data.h" />
     <ClInclude Include="company.h" />
     <ClInclude Include="dungeonMaster.h" />
+    <ClInclude Include="enemy.h" />
+    <ClInclude Include="bonus.h" />
+    <ClInclude Include="heal.h" />
+    <ClInclude Include="object.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="shot.h" />
     <ClInclude Include="textures.h" />
     <ClInclude Include="logic.h" />
+    <ClInclude Include="timer.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="methods.cpp" />
+    <None Include="player_m.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

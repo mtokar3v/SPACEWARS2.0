@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "logic.h"
-#include "dungeonMaster.h"
 
 void playCompany()
 {
@@ -27,6 +26,7 @@ void playCompany()
 	{
 		for (int i = 0; i < 60 && run; i++)
 		{
+			SDL_Delay(30);
 			if (!(i % 2))
 			{
 				backgroung.move(0, 1);
@@ -38,7 +38,6 @@ void playCompany()
 			if (backgroung2.get_y() > displayMode.h)
 				backgroung2.move(0, -(2 * displayMode.h));
 
-			SDL_Delay(30);
 			SDL_PollEvent(&event);
 
 			player.shoting(event);

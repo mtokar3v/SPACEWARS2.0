@@ -9,13 +9,12 @@ const int w = displayMode.w;
 const int h = displayMode.h;
 
 //####### CLASSES ########
-enum Trajectory;
-enum ShotTr;
-class Boom;
 class Object;
+class Boom;
+class Shot;
+class Player;
 class Shot;
 class Enemy;
-class Player;
 class Shot;
 class Heal;
 class Bonus;
@@ -60,7 +59,31 @@ SDL_Color color;
 //######### FUNCTIONS ########
 bool init();
 void move_dimanic_object();
-void add_shot(SDL_Renderer* ren, SDL_Texture* texture, int x, int y, int w, int h, int position, ShotTr tr, Player* player);
 void add_text(SDL_Renderer* ren, TTF_Font* font, SDL_Color color, std::string msg, int x, int y);
 bool isCrash(int x, int y, int w, int h);
-//void spawningBonus(int time, bool &bonusSpawn);
+void spawningEnemy(int time, int spawnTime, bool& enemySpawn, Player* player, SDL_Texture** boom_t);
+void spawningBonus(int time, bool& bonusSpawn, Player* player);
+void resetBonus(int time, bool bonusRespawn, Player* player);
+void inputInfo(int time, Player* player);
+void clearBattleArea();
+void shopping(Player* player);
+
+enum Trajectory
+{
+	LINE,
+	WALL,
+	SINUSOID,
+	COSINUSOID,
+	ARROW,
+	TRAJCOUNT
+};
+
+enum ShotTr
+{
+	NONE,
+	DUET,
+	TRIPLE,
+	RAY,
+	SHOTCOUNT
+};
+

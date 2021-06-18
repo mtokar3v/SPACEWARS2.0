@@ -2,20 +2,29 @@
 #include <time.h>
 #include <windows.h>
 #include <random>
-#include <chrono>
 #include <SDL.h>
 #include <SDL_image.h>
-#include <SDL_mixer.h>
 #include <SDL_ttf.h>
 #include <string>
 #include <vector>
+#include <chrono>
 
 #include "data.h"
 #include "textures.h"
-#include "logic.h"
+
+#include "timer.h"
+#include "object.h"
+#include "player.h"
+#include "shot.h"
+#include "player_m.inl"
+#include "boom.h"
+#include "heal.h"
+#include "bonus.h"
+#include "dungeonMaster.h"
+#include "enemy.h"
+
 #include "arcade.h"
 #include "company.h"
-#include "dungeonMaster.h"
 
 
 int main(int argc, char* argv[])
